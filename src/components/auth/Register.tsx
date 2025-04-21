@@ -1,3 +1,4 @@
+import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -10,6 +11,7 @@ const Register = ({ setIsAuthenticated }: any) => {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { register } = useAuth(); 
 
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,14 +30,16 @@ const Register = ({ setIsAuthenticated }: any) => {
       setError('Passwords do not match');
       return;
     }
-    
+
+
+    register(formData.fullName, formData.email, formData.password)
     // Simulate API call
-    setTimeout(() => {
-      // Mock successful registration
-      localStorage.setItem('token', 'mock-jwt-token');
-      setIsAuthenticated(true);
-      navigate('/dashboard');
-    }, 1000);
+    // setTimeout(() => {
+    //   // Mock successful registration
+    //   localStorage.setItem('token', 'mock-jwt-token');
+    //   setIsAuthenticated(true);
+    //   navigate('/dashboard');
+    // }, 1000);
   };
 
   return (

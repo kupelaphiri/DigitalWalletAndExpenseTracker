@@ -7,10 +7,13 @@ import Register from './components/auth/Register'
 import RootLayout from './RootLayout'
 import SendMoney from './components/pages/SendMoney';
 import ExpenseTracker from './components/pages/ExpenseTracker'
+import { useSelector } from 'react-redux'
+import { auth_selector } from './store/slices/auth_slice'
+import RequireAuth from './RequireAuth'
 
 
 const AppRoutes = () => {
-      const [isAuthenticated, setIsAuthenticated] = useState(true);
+      const { isAuthenticated } = useSelector(auth_selector)
       const [loading, setLoading] = useState(true);
       
     //   // Simulating authentication check
@@ -30,12 +33,14 @@ const AppRoutes = () => {
   return (
     <Routes>
          <Route>
-          <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-          <Route path="/register" element={<Register setIsAuthenticated={setIsAuthenticated} />} />
+          <Route path="/login" element={<Login  />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Route>
         <Route element={
-            <RootLayout /> 
+          <RequireAuth redirectTo="/login">
+            <RootLayout />   
+          </RequireAuth>
         }>
        
        <Route>

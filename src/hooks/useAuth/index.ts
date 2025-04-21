@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setAuthState } from '@/store/slices/auth_slice';
-import axios from 'axios';
+import api from '@/axios';
 
 interface AuthResponse {
     user: {
@@ -25,13 +25,16 @@ export const useAuth = () => {
         setError(null);
 
         try {
-            const response = await axios.post<AuthResponse>(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, { Username: username, Email: email, Password: password });
-            console.log('response.data', response.data)
+            // const response = await axios.post<AuthResponse>(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, { Username: username, Email: email, Password: password }, {
+            //     withCredentials: true,
+            // });
+            const response = await api.post<AuthResponse>('/auth/login', { Username: username, Email: email, Password: password }).then((res) => {
+                return res.data
+            })
             dispatch(setAuthState({
                 isAuthenticated: true,
-                user: response.data.user,
-                access_token: response.data.accessToken,
-                refresh_token: response.data.refreshToken,
+                user: response.user,
+                accessToken: response.accessToken,
             }));
             navigate('/dashboard');
         } catch (err: any) {
@@ -45,12 +48,14 @@ export const useAuth = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.post<AuthResponse>('/auth/register', { name, email, password });
+            // const response = await axios.post<AuthResponse>('/auth/register', { name, email, password });
+            const response = await api.post<AuthResponse>('/auth/register', { Username: name, Email: email, Password: password }).then((res) => {
+                return res.data
+            })
             dispatch(setAuthState({
                 isAuthenticated: true,
-                user: response.data.user,
-                access_token: response.data.accessToken,
-                refresh_token: response.data.refreshToken,
+                user: response.user,
+                accessToken: response.accessToken,
             }));
             navigate('/dashboard');
         } catch (err: any) {
@@ -60,12 +65,12 @@ export const useAuth = () => {
         }
     }, [dispatch, navigate]);
 
-    const logout = useCallback(() => {
+    const logout = useCallback(async() => {
+        await api.post('/auth/logout')
         dispatch(setAuthState({
             isAuthenticated: false,
             user: null,
-            access_token: null,
-            refresh_token: null,
+            accessToken: null,
         }));
         navigate('/login');
     }, [dispatch, navigate]);
