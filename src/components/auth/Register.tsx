@@ -20,7 +20,6 @@ const Register = ({ setIsAuthenticated }: any) => {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     
-    // Basic validation
     if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all fields');
       return;
@@ -30,16 +29,7 @@ const Register = ({ setIsAuthenticated }: any) => {
       setError('Passwords do not match');
       return;
     }
-
-
     register(formData.fullName, formData.email, formData.password)
-    // Simulate API call
-    // setTimeout(() => {
-    //   // Mock successful registration
-    //   localStorage.setItem('token', 'mock-jwt-token');
-    //   setIsAuthenticated(true);
-    //   navigate('/dashboard');
-    // }, 1000);
   };
 
   return (

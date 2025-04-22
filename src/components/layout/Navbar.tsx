@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Bell, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSelector } from 'react-redux';
+import { auth_selector } from '@/store/slices/auth_slice';
 
 const Navbar = () => {
   const [notifications, setNotifications] = useState(3);
   const { logout } = useAuth()
+  const { user } = useSelector(auth_selector)
   
   return (
     <nav className="bg-white shadow-md p-4 flex justify-between items-center">
@@ -26,10 +29,10 @@ const Navbar = () => {
           <div className="bg-indigo-100 p-2 rounded-full">
             <User className="h-5 w-5 text-indigo-600" />
           </div>
-          <span className="text-gray-700 font-medium">John Doe</span>
+          <span className="text-gray-700 font-medium">{user.username}</span>
         </div>
         
-        <button onClick={logout} className="flex items-center text-red-500 hover:text-red-700">
+        <button onClick={logout} className="flex cursor-pointer items-center text-red-500 hover:text-red-700">
           <LogOut className="h-5 w-5 mr-1" />
           <span>Logout</span>
         </button>

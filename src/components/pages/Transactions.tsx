@@ -1,35 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Filter, Download } from 'lucide-react';
 import TransactionItem from '../atoms/TransactionItem';
+import { useSelector } from 'react-redux';
+import { useTransactions } from '@/hooks/useTransactions';
+import { transaction_selector } from '@/store/slices/transaction_slice';
+import { auth_selector } from '@/store/slices/auth_slice';
 
 const Transactions = () => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const { transactions } = useSelector(transaction_selector)
+  const { fetchTransactions } = useTransactions()
+  const { user } = useSelector(auth_selector)
+ 
+  useEffect(() => {
+    fetchTransactions(user.id)
+  }, [])
   
-  // Mock data
-  const transactions = [
-    { id: 1, title: 'Grocery Store', amount: -85.20, date: '2025-04-10', category: 'Groceries' },
-    { id: 2, title: 'Salary Deposit', amount: 2800.00, date: '2025-04-05', category: 'Income' },
-    { id: 3, title: 'Netflix Subscription', amount: -14.99, date: '2025-04-03', category: 'Entertainment' },
-    { id: 4, title: 'Transfer to Savings', amount: -500.00, date: '2025-04-02', category: 'Savings' },
-    { id: 5, title: 'Restaurant Dinner', amount: -62.50, date: '2025-04-01', category: 'Food' },
-    { id: 6, title: 'Freelance Payment', amount: 400.00, date: '2025-03-28', category: 'Income' },
-    { id: 7, title: 'Gas Station', amount: -45.00, date: '2025-03-26', category: 'Transportation' },
-    { id: 8, title: 'Mobile Phone Bill', amount: -35.00, date: '2025-03-25', category: 'Utilities' },
-  ];
   
   // Filter transactions
-  const filteredTransactions = transactions.filter(t => {
+  const filteredTransactions = transactions.filter((t: any) => {
     const matchesFilter = 
       filter === 'all' || 
       (filter === 'income' && t.amount > 0) || 
       (filter === 'expense' && t.amount < 0);
       
-    const matchesSearch = 
-      t.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      t.category.toLowerCase().includes(searchTerm.toLowerCase());
+    // const matchesSearch = 
+    //   t.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    //   t.category.toLowerCase().includes(searchTerm.toLowerCase());
       
-    return matchesFilter && matchesSearch;
+    return matchesFilter ;
   });
   
   return (
@@ -77,7 +77,7 @@ const Transactions = () => {
         
         <div>
           {filteredTransactions.length > 0 ? (
-            filteredTransactions.map(transaction => (
+            filteredTransactions.map((transaction: any) => (
               
               <TransactionItem key={transaction.id} transaction={transaction} detailed />
             ))

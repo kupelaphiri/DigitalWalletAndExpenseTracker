@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import authReducer from './slices/auth_slice'
+import transactionsReducer from './slices/transaction_slice'
 
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
+        transactions: transactionsReducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware({
         serializableCheck: false,

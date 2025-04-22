@@ -1,4 +1,3 @@
-// axios.js
 import axios from 'axios';
 import { store } from './store';
 import { setAccessToken } from './store/slices/auth_slice';

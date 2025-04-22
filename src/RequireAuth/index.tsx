@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, useNavigate, } from 'react-router-dom';
-import { auth_selector, setAccessToken, setIsAuthenticated } from '@/store/slices/auth_slice';
+import { auth_selector, setAccessToken, setAuthState, setIsAuthenticated } from '@/store/slices/auth_slice';
 import api from '@/axios';
 
 interface RequireAuthProps {
@@ -22,9 +22,13 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ redirectTo, children }) => {
             const res = await api.get('/auth/refresh-token').then((res) => {
                return res.data
             })
-            // const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/refresh-token`, { withCredentials: true });
-            const { accessToken } = res;
+            const { user, accessToken } = res;
             dispatch(setAccessToken(accessToken));
+            dispatch(setAuthState({
+                isAuthenticated: true,
+                user: user,
+                accessToken: accessToken,
+            }))
             dispatch(setIsAuthenticated(true))
         } catch (error) {
             alert('Session expired. Please log in again.');
