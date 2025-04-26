@@ -25,9 +25,6 @@ export const useAuth = () => {
         setError(null);
 
         try {
-            // const response = await axios.post<AuthResponse>(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, { Username: username, Email: email, Password: password }, {
-            //     withCredentials: true,
-            // });
             const response = await api.post<AuthResponse>('/auth/login', { Username: username, Email: email, Password: password }).then((res) => {
                 return res.data
             })
@@ -48,7 +45,6 @@ export const useAuth = () => {
         setLoading(true);
         setError(null);
         try {
-            // const response = await axios.post<AuthResponse>('/auth/register', { name, email, password });
             const response = await api.post<AuthResponse>('/auth/register', { Username: name, Email: email, Password: password }).then((res) => {
                 return res.data
             })

@@ -1,11 +1,9 @@
-import { useState } from 'react';
-import { Bell, User, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useSelector } from 'react-redux';
 import { auth_selector } from '@/store/slices/auth_slice';
 
 const Navbar = () => {
-  const [notifications, setNotifications] = useState(3);
   const { logout } = useAuth()
   const { user } = useSelector(auth_selector)
   
@@ -16,14 +14,6 @@ const Navbar = () => {
       </div>
       
       <div className="flex items-center space-x-6">
-        <div className="relative">
-          <Bell className="h-6 w-6 text-gray-600 cursor-pointer" />
-          {notifications > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {notifications}
-            </span>
-          )}
-        </div>
         
         <div className="flex items-center space-x-2 cursor-pointer">
           <div className="bg-indigo-100 p-2 rounded-full">
