@@ -5,15 +5,16 @@ export interface Transaction {
     userId: string;
     amount: number;
     recipientEmail: string;
-    data: Date;
 }
   
 interface TransactionState {
     transactions: Transaction[];
+    balance: number;
   }
   
   const initialState: TransactionState = {
     transactions: [],
+    balance: 0,
   };
 
   export const STATE_KEY = 'transactions';
@@ -33,6 +34,9 @@ interface TransactionState {
           state.transactions[index] = action.payload;
         }
       },
+      balanceUpdate(state, action: PayloadAction<number>) {
+        state.balance = action.payload;
+      },
       deleteTransaction(state, action: PayloadAction<number>) {
         state.transactions = state.transactions.filter(t => t.id !== action.payload);
       },
@@ -48,6 +52,7 @@ interface TransactionState {
     updateTransaction,
     deleteTransaction,
     clearTransactions,
+    balanceUpdate,
   } = transactionSlice.actions;
   
   export default transactionSlice.reducer;

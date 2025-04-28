@@ -1,14 +1,14 @@
 // components/ExpenseTracker.tsx
 import React, { useState, FC, useEffect } from 'react';
-import { ChartPie, BarChart3, Plus, Calendar, Filter, TrashIcon } from 'lucide-react';
-import useExpenses, { Expense } from '@/hooks/useExpenses';
+import { ChartPie, BarChart3, Plus, Calendar, Filter, } from 'lucide-react';
+import useExpenses from '@/hooks/useExpenses';
 import { useSelector } from 'react-redux';
 import { auth_selector } from '@/store/slices/auth_slice';
-import { getCategoryColor } from '@/lib/utils';
-import { PieChart } from 'react-minimal-pie-chart';
+import { getCategoryColor, groupExpensesByCategory } from '@/lib/utils';
 import ConfirmationModal from '../modal/ConfirmationModal';
+import ExpensePieChart from '../atoms/ExpensePieChart';
 
-interface ExpenseCategory {
+export interface ExpenseCategory {
   [category: string]: number;
 }
 
@@ -50,13 +50,10 @@ const ExpenseTracker: FC = () => {
   
   // State for view type
   const [viewType, setViewType] = useState<'category' | 'timeline'>('category');
-  
-  // State for time period
   const [timePeriod, setTimePeriod] = useState<'week' | 'month' | 'year'>('month');
-  
-  // Calculate total expenses
   const [totalExpenses, setTotalExpenses] = useState<number>(0)
-  const { expenses, getExpenses, addExpense, } = useExpenses();
+  const [expenseId, setExpenseId] = useState<number>(0)
+  const { expenses, getExpenses, addExpense, deleteExpense} = useExpenses();
   const { user } = useSelector(auth_selector)
 
   useEffect(() => {
@@ -86,41 +83,11 @@ const ExpenseTracker: FC = () => {
      setTotalExpenses(total);
  }
 
-
-
- const groupExpensesByCategory = (expenses: Expense[]): ExpenseCategory => {
-  // Initialize with all categories set to 0
-  const initialCategories: ExpenseCategory = {
-    Food: 0,
-    Entertainment: 0,
-    Utilities: 0,
-    Transport: 0,
-    Shopping: 0,
-    Housing: 0,
-    Health: 0,
-    Education: 0,
-    Travel: 0,
-    Other: 0
-  };
-
-  return expenses.reduce((acc, expense) => {
-    // If the category exists in our accumulator, add the amount
-    if (expense.category in acc) {
-      acc[expense.category] += expense.amount;
-    } else {
-      // If it's a new category not in our initial list, add it to "Other"
-      acc.Other += expense.amount;
-    }
-    return acc;
-  }, {...initialCategories}); // Start with a copy of the initial categories
-};
-
-
+ 
 
 useEffect(() => {
   calculateTotalExpenses();
   const catgorisedExpenses = groupExpensesByCategory(expenses);
-  console.log('catgorisedExpenses', catgorisedExpenses)
   setExpensesByCategory(catgorisedExpenses);
 }, [expenses])
   
@@ -140,6 +107,7 @@ useEffect(() => {
     
     // Reset form and close modal
     addExpense({
+      id: 12345,
       title: newExpense.title,
       amount: parseFloat(newExpense.amount),
       category: newExpense.category,
@@ -229,8 +197,8 @@ useEffect(() => {
           </div>
           
           <div className="flex flex-wrap gap-2">
-            <div className="bg-blue-50 px-3 py-1 rounded-full text-sm text-blue-600 flex items-center">
-              <span className="font-medium mr-1">Top:</span> Housing
+            <div className={`${getCategoryColor(sortedCategories[0][0])} px-3 py-1 rounded-full text-sm text-blue-600 flex items-center`}>
+              <span className="font-medium mr-1">Top:</span> {sortedCategories[0][0]}
             </div>
             <div className="bg-green-50 px-3 py-1 rounded-full text-sm text-green-600 flex items-center">
               <span className="font-medium mr-1">Lowest:</span> Travel
@@ -252,7 +220,7 @@ useEffect(() => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="col-span-1 flex justify-center items-center">
               <div className="w-48 h-48 rounded-full bg-gray-100 flex items-center justify-center">
-                <ChartPie size={60} className="text-blue-500 opacity-70" />
+                <ExpensePieChart categories={expensesByCategory} />
               </div>
             </div>
             
@@ -347,7 +315,10 @@ useEffect(() => {
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">{expense.title}</td>
                   <td className="py-3 px-4 text-right text-sm font-medium text-red-600">-K{expense.amount.toFixed(2)}</td>
-                  <td onClick={() => setShowConfirmationModal(true)} className="py-3 px-4 text-right text-sm cursor-pointer font-medium text-red-600">Delete</td>
+                  <td onClick={() => {
+                    setExpenseId(expense.id)
+                    setShowConfirmationModal(true)
+                    }} className="py-3 px-4 text-right text-sm cursor-pointer font-medium text-red-600">Delete</td>
                 </tr>
               ))}
               </tbody>
@@ -476,6 +447,7 @@ useEffect(() => {
        message='Are you sure you want to delete this expense?'
        onConfirm={() => {
         setShowConfirmationModal(false)
+        deleteExpense(expenseId)
         }}
         confirmText='Delete'
       />

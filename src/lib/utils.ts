@@ -1,3 +1,5 @@
+import { ExpenseCategory } from "@/components/pages/ExpenseTracker";
+import { Expense } from "@/hooks/useExpenses";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -27,3 +29,27 @@ export function parseISOString(s: any) {
   var b = s.split(/\D+/);
   return new Date(Date.UTC(b[0], --b[1], b[2])); // Only year, month, day
 }
+
+export const groupExpensesByCategory = (expenses: Expense[]): ExpenseCategory => {
+  const initialCategories: ExpenseCategory = {
+    Food: 0,
+    Entertainment: 0,
+    Utilities: 0,
+    Transport: 0,
+    Shopping: 0,
+    Housing: 0,
+    Health: 0,
+    Education: 0,
+    Travel: 0,
+    Other: 0
+  };
+
+  return expenses.reduce((acc, expense) => {
+    if (expense.category in acc) {
+      acc[expense.category] += expense.amount;
+    } else {
+      acc.Other += expense.amount;
+    }
+    return acc;
+  }, {...initialCategories}); 
+};

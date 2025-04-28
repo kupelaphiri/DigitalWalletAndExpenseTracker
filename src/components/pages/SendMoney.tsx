@@ -1,41 +1,26 @@
 // components/SendMoney.tsx
-import { useState, FC, FormEvent } from 'react';
-import { Search, UserPlus, Clock } from 'lucide-react';
-
-interface Contact {
-  id: number;
-  name: string;
-  email: string;
-  avatar: string;
-}
-
-interface RecentRecipient {
-  id: number;
-  name: string;
-  email: string;
-  date: string;
-}
+import { useState, FC, FormEvent, useEffect } from 'react';
+import { Clock } from 'lucide-react';
+import { useTransactions } from '@/hooks/useTransactions';
+import { useSelector } from 'react-redux';
+import { auth_selector } from '@/store/slices/auth_slice';
+import { transaction_selector } from '@/store/slices/transaction_slice';
 
 const SendMoney: FC = () => {
   const [amount, setAmount] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const { createTransaction, fetchTransactions } = useTransactions()
+  const { user } = useSelector(auth_selector)
+  const { transactions } = useSelector(transaction_selector)
+
+  useEffect(() => {
+    fetchTransactions(user.id)
+  }, [])
+
+  const recentTransactions = transactions.slice(0, 3)
   
-  // Mock frequent contacts
-  const frequentContacts: Contact[] = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', avatar: '/api/placeholder/48/48' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', avatar: '/api/placeholder/48/48' },
-    { id: 3, name: 'Alex Johnson', email: 'alex@example.com', avatar: '/api/placeholder/48/48' },
-    { id: 4, name: 'Sarah Williams', email: 'sarah@example.com', avatar: '/api/placeholder/48/48' },
-  ];
-  
-  // Mock recent transactions
-  const recentRecipients: RecentRecipient[] = [
-    { id: 101, name: 'Coffee Shop', email: 'info@coffeeshop.com', date: '2 days ago' },
-    { id: 102, name: 'Amy Lee', email: 'amy@example.com', date: '1 week ago' },
-    { id: 103, name: 'Electric Company', email: 'payments@electric.com', date: '1 month ago' },
-  ];
 
   const handleSendMoney = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -51,22 +36,16 @@ const SendMoney: FC = () => {
   };
   
   const confirmTransaction = (): void => {
-    // This would send the actual API request in a real implementation
-    console.log('Transaction confirmed:', { 
+    createTransaction({ 
       amount: parseFloat(amount), 
-      recipient, 
-      note, 
-      timestamp: new Date() 
-    });
-    
+      userId: user.id,
+      recipientEmail: recipient,
+    })
     // Reset form and hide confirmation
     setAmount('');
     setRecipient('');
     setNote('');
     setShowConfirmation(false);
-    
-    // Show success message
-    alert('Money sent successfully!');
   };
 
   return (
@@ -74,59 +53,24 @@ const SendMoney: FC = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Send Money</h1>
       
       <div className="mb-8">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search size={20} className="text-gray-400" />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Search by name, email or phone number" 
-            className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-      
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">Frequent Contacts</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {frequentContacts.map((contact) => (
-            <div 
-              key={contact.id} 
-              className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center cursor-pointer hover:shadow-md transition-shadow duration-200"
-              onClick={() => setRecipient(contact.email)}
-            >
-              <img 
-                src={contact.avatar} 
-                alt={contact.name} 
-                className="w-12 h-12 rounded-full mb-2" 
-              />
-              <span className="font-medium text-gray-800">{contact.name}</span>
-              <span className="text-sm text-gray-500 truncate w-full text-center">{contact.email}</span>
-            </div>
-          ))}
-          <div className="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors duration-200">
-            <UserPlus size={24} className="text-gray-500 mb-2" />
-            <span className="text-gray-600 font-medium">Add Contact</span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Recent</h2>
         <div className="space-y-3">
-          {recentRecipients.map((recent) => (
+          {recentTransactions.map((transaction: any) => (
             <div 
-              key={recent.id} 
+              key={transaction.id} 
               className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center cursor-pointer hover:shadow-md transition-shadow duration-200"
-              onClick={() => setRecipient(recent.email)}
+              onClick={() => {
+                setRecipient(transaction.recipientEmail)
+                setAmount(transaction.amount)
+              }}
             >
               <div className="flex flex-col">
-                <span className="font-medium text-gray-800">{recent.name}</span>
-                <span className="text-sm text-gray-500">{recent.email}</span>
+                <span className="font-medium text-gray-800">K{transaction.amount}</span>
+                <span className="text-sm text-gray-500">{transaction.recipientEmail}</span>
               </div>
               <div className="flex items-center text-gray-500">
                 <Clock size={16} className="mr-1" />
-                <span className="text-sm">{recent.date}</span>
+                <span className="text-sm">{new Date(transaction.date).toLocaleString()}</span>
               </div>
             </div>
           ))}
@@ -158,7 +102,7 @@ const SendMoney: FC = () => {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <span className="text-gray-500">$</span>
+              <span className="text-gray-500">K</span>
             </div>
             <input
               type="number"

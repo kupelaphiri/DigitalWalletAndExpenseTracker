@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { ChevronDown, ChevronUp, DollarSign, Calendar, User } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { auth_selector } from '@/store/slices/auth_slice';
 
 export default function TransactionItem({ transaction, detailed = false }: any) {
   const [isExpanded, setIsExpanded] = useState(detailed);
+  const { user } = useSelector(auth_selector);
   
   // Format amount to always show 2 decimal places and add appropriate sign
   const formattedAmount = new Intl.NumberFormat('en-US', {
@@ -11,7 +14,7 @@ export default function TransactionItem({ transaction, detailed = false }: any) 
   }).format(transaction.amount);
   
   // Determine if transaction is income or expense based on amount
-  const isIncome = transaction.amount > 0;
+  const isIncome = transaction.userId != user.id
   
   // Format date
   const formattedDate = new Date(transaction.date).toLocaleDateString('en-US', {
@@ -79,7 +82,7 @@ export default function TransactionItem({ transaction, detailed = false }: any) 
               </div>
               {transaction.tags && transaction.tags.length > 0 && (
                 <div className="flex gap-1 flex-wrap justify-end">
-                  {transaction.tags.map((tag, index) => (
+                  {transaction.tags.map((tag: any, index: number) => (
                     <span key={index} className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
                       {tag}
                     </span>

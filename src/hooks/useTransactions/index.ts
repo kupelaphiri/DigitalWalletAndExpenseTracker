@@ -15,7 +15,6 @@ export const useTransactions = () => {
             const response = await api.get<Transaction[]>(`transactions/${userId}`).then((res) => {
                 return res.data
             });
-            console.log('response', response)
             dispatch(setTransactions(response))
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to fetch transactions');
@@ -24,14 +23,13 @@ export const useTransactions = () => {
         }
     }, []);
 
-    const createTransaction = useCallback(async (transaction: Transaction) => {
+    const createTransaction = useCallback(async (transaction: Omit<Transaction, 'id'>) => {
         setLoading(true);
         setError(null);
         try {
             const response = await api.post<any>(`transactions`, transaction).then((res) => {
                 return res.data
             });
-            console.log('response', response)
             alert(response.message)
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to create transaction');

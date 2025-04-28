@@ -1,7 +1,21 @@
 import { NavLink } from 'react-router-dom';
 import { Home, CreditCard, Send, PieChart, User } from 'lucide-react';
+import useWallet from '@/hooks/useWallet';
+import { useSelector } from 'react-redux';
+import { auth_selector } from '@/store/slices/auth_slice';
+import { useEffect } from 'react';
+import { transaction_selector } from '@/store/slices/transaction_slice';
 
 const Sidebar = () => {
+  const { fetchBalance } = useWallet();
+  const { user } = useSelector(auth_selector);
+  const { balance } = useSelector(transaction_selector)
+
+  useEffect(() => {
+    if (user) {
+      fetchBalance(user);
+    }
+  }, [])
   const navItems = [
     { path: '/dashboard', name: 'Dashboard', icon: <Home className="w-5 h-5" /> },
     { path: '/transactions', name: 'Transactions', icon: <CreditCard className="w-5 h-5" /> },
@@ -42,7 +56,7 @@ const Sidebar = () => {
       <div className="mt-auto pt-8">
         <div className="bg-indigo-700 rounded-lg p-4">
           <h3 className="font-medium mb-2">Available Balance</h3>
-          <p className="text-2xl font-bold">$2,456.80</p>
+          <p className="text-2xl font-bold">K{balance}</p>
         </div>
       </div>
     </div>
